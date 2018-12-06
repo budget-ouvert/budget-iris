@@ -4,31 +4,27 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>PLF RainbowViz</title>
+  <title>Budget Iris / RainbowViz</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
   <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
-  <script>
-
-  </script>
 
 </head>
 
 <body>
-  <header class="navbar">
+  <header class="navbar" style="padding:1rem;">
     <section class="navbar-section">
-      <a href="#" class="btn btn-link">Rainbow PLF</a>
     </section>
     <section class="navbar-center">
     </section>
     <section class="navbar-section">
-      <a href="https://github.com/rainbowViz/" class="btn btn-link">GitHub</a>
+      <a href="https://github.com/rainbowViz/simpleRainbowViz/" class="btn btn-link">Dépôt GitHub</a>
     </section>
   </header>
 
   <div class="container" style="padding:1rem;">
-    <h1>PLF Budget Iris</h1>
+    <h1>Budget Iris</h1>
     <ul class="tab tab-block">
       <li class="tab-item active">
         <a href="#tab-1">Visualisation Complete</a>
@@ -93,7 +89,6 @@
       .style("border-radius", "6px")
       .style("font", "12px sans-serif")
       .text("tooltip");
-
 
 
   // GRAPH COMPLET 
@@ -169,6 +164,7 @@
     node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
     circle.attr("r", function(d) { return d.r * k; });
   }
+
   //GRAPH diff : Assomptions on code above
   var svg2 = d3.select("#svg2"),
     g2 = svg2.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
@@ -291,51 +287,39 @@
 
   </script>
   <style>
-    /* text {
-      font: 10px sans-serif;
-      text-anchor: middle;
-    }
+  .node {
+    cursor: pointer;
+  }
 
-    .node--hover circle {
-      stroke: #000;
-      stroke-width: 1.2px;
-    } */
+  .node:hover {
+    stroke: #000;
+    stroke-width: 1.5px;
+  }
 
-.node {
-  cursor: pointer;
-}
+  .node--leaf {
+    fill: white;
+  }
 
-.node:hover {
-  stroke: #000;
-  stroke-width: 1.5px;
-}
+  .label {
+    font: 13px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-anchor: middle;
+    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+  }
 
-.node--leaf {
-  fill: white;
-}
+  .label,
+  .node--root,
+  .node--leaf {
+    pointer-events: none;
+  }
 
-.label {
-  font: 13px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  text-anchor: middle;
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
-}
-
-.label,
-.node--root,
-.node--leaf {
-  pointer-events: none;
-}
-
-
-.tab-content > .tab-pane {
-  display: none;
-}
- .tab-content > .tab-pane.active {
-  display: block;
-  padding: 2.5% 3.5%;
-  background-color: #efefef;
-}
-
+  .tab-content > .tab-pane {
+    display: none;
+  }
+  .tab-content > .tab-pane.active {
+    display: block;
+    padding: 2.5% 3.5%;
+    background-color: #efefef;
+  }
 
   </style>
 

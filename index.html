@@ -29,17 +29,18 @@
 
   <div class="container" style="padding:1rem;">
     <div class="columns">
-      <section class="column col-3">
+      <!-- <section class="column col-3">
         <h1>Section</h1>
-      </section>
+      </section> -->
       <section class="column col-9">
-        <div id="results" >
-            <div class="empty" >
+        <div id="chart" >
+            <svg width="800" height="800"></svg>
+            <!-- <div class="empty" >
                 <div class="empty-icon">
                   <i class="icon icon-search"></i>
                 </div>
                 <p class="empty-title h5"> Missing Data</p>
-            </div>
+            </div> -->
         </div>        
       </section>
     </div> <!-- columns -->
@@ -47,11 +48,149 @@
 
   </div>
   <script src="./data_plf_2019.js"></script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
   <script>
+    // let diameter = 500;
+    let colorz = d3.scaleOrdinal(d3.schemeSet3);
+    var color = d3.scaleSequential(d3.interpolateSinebow)
+    .domain([-4, 4]);
+    
+
+    var svg = d3.select("svg"),
+        margin = 10,
+        diameter = +svg.attr("width"),
+        g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+
+     var pack = d3.pack()
+        .size([diameter - margin, diameter - margin])
+        .padding(1);
+  //       d3.json("flare.json", function(error, root) {
+  // if (error) throw error;
+
+Budget généralAction et transformation publiquesRénovation des cités administratives et autres sites domaniaux multi-occupantsEtudes
+Budget généralAction et transformation publiquesRénovation des cités administratives et autres sites domaniaux multi-occupantsEtudes
+let root = d3.hierarchy(modelplf2019)
+      .sum(function(d) { return d.size; })
+      .sort(function(a, b) { return b.value - a.value; });
+
+  var focus = root,
+      nodes = pack(root).descendants(),
+      view;
+
+  var circle = g.selectAll("circle")
+    .data(nodes)
+    .enter().append("circle")
+      .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
+      // .style("fill", function(d) { return  colorz(d.value%1+1); })
+      .style("fill", function(d) { return  colorz(d.value+1); })
+
+      .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
+
+  var text = g.selectAll("text")
+    .data(nodes)
+    .enter().append("text")
+      .attr("class", "label")
+      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0.5; })
+      .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
+      .text(function(d) { return d.data.name; });
+
+  var node = g.selectAll("circle,text");
+
+  svg
+      .style("background", colorz(0))
+      .on("click", function() { zoom(root); });
+
+  zoomTo([root.x, root.y, root.r * 2 + margin]);
+
+  function zoom(d) {
+    var focus0 = focus; focus = d;
+
+    var transition = d3.transition()
+        .duration(d3.event.altKey ? 7500 : 750)
+        .tween("zoom", function(d) {
+          var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+          return function(t) { zoomTo(i(t)); };
+        });
+
+    transition.selectAll("text")
+      .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+        .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
+        .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+        .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+  }
+
+  function zoomTo(v) {
+    var k = diameter / v[2]; view = v;
+    node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+    circle.attr("r", function(d) { return d.r * k; });
+  }
+
+  //   let div = d3.select('#chart');
+  //   // let svg = div.selectAll('svg');
+  //   //     svg.attr('width', 800).attr('height', 800);
+  //   var svg = d3.select("svg"),
+
+  //   width = +svg.attr("width"),
+  //   height = +svg.attr("height");
+  // console.log("width",width,"height",height);
+
+  //   let nodez = svg.selectAll("circle")
+  //     .data(plf2019)
+  //     .enter()
+  //     .append("circle")
+  //     .attr('r', function(d) { return d["Crédits de paiement"]/1000000000})
+      
+  //     .style("fill", function(d) { return color(d.Action)});
+    
+
+// var stratify = d3.stratify()
+//     .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
+//     var pack = d3.pack()
+//     .size([width - 2, height - 2])
+//     .padding(1);
+
+
+//  var root = stratify(plf2019)
+//       .sum(function(d) { return d.value; })
+//       .sort(function(a, b) { return b.value - a.value; });
+console.log(plf2019)
 
   </script>
   <style>
+    /* text {
+      font: 10px sans-serif;
+      text-anchor: middle;
+    }
 
+    .node--hover circle {
+      stroke: #000;
+      stroke-width: 1.2px;
+    } */
+
+.node {
+  cursor: pointer;
+}
+
+.node:hover {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node--leaf {
+  fill: white;
+}
+
+.label {
+  font: 13px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-anchor: middle;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+}
+
+.label,
+.node--root,
+.node--leaf {
+  pointer-events: none;
+}
   </style>
 
 

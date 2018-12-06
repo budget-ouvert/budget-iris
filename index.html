@@ -23,57 +23,94 @@
     <section class="navbar-center">
     </section>
     <section class="navbar-section">
-      <a href="#" class="btn btn-link">GitHub</a>
+      <a href="https://github.com/rainbowViz/" class="btn btn-link">GitHub</a>
     </section>
   </header>
 
   <div class="container" style="padding:1rem;">
-    <div class="columns">
-      <!-- <section class="column col-3">
-        <h1>Section</h1>
-      </section> -->
-      <section class="column col-9">
-        <div id="chart" >
-            <svg width="800" height="800"></svg>
-            <!-- <div class="empty" >
-                <div class="empty-icon">
-                  <i class="icon icon-search"></i>
-                </div>
-                <p class="empty-title h5"> Missing Data</p>
-            </div> -->
-        </div>        
-      </section>
-    </div> <!-- columns -->
+    <h1>PLF Budget Iris</h1>
+    <ul class="tab tab-block">
+      <li class="tab-item active">
+        <a href="#tab-1">Visualisation Complete</a>
+      </li>
+      <li class="tab-item">
+        <a href="#tab-2" >Comparatif</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+			<div id="tab-1" class="tab-pane active"> 
+        <div class="columns">
+          <section class="column col">
+            <!-- <h1>Section</h1> -->
+          </section> 
+          <section class="column col">
+            <div id="chart" >
+                <svg id="svg1" width="800" height="800"></svg>
+            </div>        
+          </section>
+          <section class="column col">
+            </section> 
+        </div> <!-- columns -->
+			</div> 
+			<div id="tab-2" class="tab-pane">
+          <div class="columns">
+              <section class="column col">
+              </section> 
+              <section class="column col">
+                <div id="chartDiff" >
+                    <svg id="svg2" width="800" height="800"></svg>
+                </div>        
+              </section>
+              <section class="column col">
+              </section>
+            </div> <!-- columns -->
+      </div>
+    </div> <!-- tab content -->
+
+
   </div> <!-- container-->
 
   </div>
   <script src="./data_plf_2019.js"></script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script>
-    // let diameter = 500;
-    let colorz = d3.scaleOrdinal(d3.schemeSet3);
-    var color = d3.scaleSequential(d3.interpolateSinebow)
-    .domain([-4, 4]);
-    
 
-    var svg = d3.select("svg"),
-        margin = 10,
-        diameter = +svg.attr("width"),
-        g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+  let colorz = d3.scaleOrdinal(d3.schemeSet3);
+  let color = d3.scaleSequential(d3.interpolateSinebow)
+  .domain([-4, 4]);
+  let colorScale = d3.scaleSequential(d3.interpolateRdYlGn)
+  .domain([-500000000,500000000])
+  let colorGreys = d3.scaleSequential(d3.interpolateGreys)
 
-     var pack = d3.pack()
-        .size([diameter - margin, diameter - margin])
-        .padding(1);
-  //       d3.json("flare.json", function(error, root) {
-  // if (error) throw error;
+  let tooltip = d3.select("body")
+      .append("div")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden")
+      .style("color", "white")
+      .style("padding", "8px")
+      .style("background-color", "rgba(0, 0, 0, 0.75)")
+      .style("border-radius", "6px")
+      .style("font", "12px sans-serif")
+      .text("tooltip");
 
-Budget généralAction et transformation publiquesRénovation des cités administratives et autres sites domaniaux multi-occupantsEtudes
-Budget généralAction et transformation publiquesRénovation des cités administratives et autres sites domaniaux multi-occupantsEtudes
-let root = d3.hierarchy(modelplf2019)
-      .sum(function(d) { return d.size; })
-      .sort(function(a, b) { return b.value - a.value; });
 
-  var focus = root,
+
+  // GRAPH COMPLET 
+  var svg = d3.select("#svg1"),
+      margin = 10,
+      diameter = +svg.attr("width"),
+      g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+
+  var pack = d3.pack()
+    .size([diameter - margin, diameter - margin])
+    .padding(1);
+
+  let root = d3.hierarchy(modelplf2019)
+        .sum(function(d) { return d.size; })
+        .sort(function(a, b) { return b.value - a.value; });
+
+  let focus = root,
       nodes = pack(root).descendants(),
       view;
 
@@ -84,7 +121,15 @@ let root = d3.hierarchy(modelplf2019)
       // .style("fill", function(d) { return  colorz(d.value%1+1); })
       .style("fill", function(d) { return  colorz(d.value+1); })
 
-      .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
+      .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
+      .on("mouseover", function(d) {
+              tooltip.text(d.data.name + "\n " + Math.round(d.value/1000000000)+'Md€');
+              tooltip.style("visibility", "visible");
+      })
+      .on("mousemove", function() {
+          return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+      })
+      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
   var text = g.selectAll("text")
     .data(nodes)
@@ -124,36 +169,125 @@ let root = d3.hierarchy(modelplf2019)
     node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
     circle.attr("r", function(d) { return d.r * k; });
   }
-
-  //   let div = d3.select('#chart');
-  //   // let svg = div.selectAll('svg');
-  //   //     svg.attr('width', 800).attr('height', 800);
-  //   var svg = d3.select("svg"),
-
-  //   width = +svg.attr("width"),
-  //   height = +svg.attr("height");
-  // console.log("width",width,"height",height);
-
-  //   let nodez = svg.selectAll("circle")
-  //     .data(plf2019)
-  //     .enter()
-  //     .append("circle")
-  //     .attr('r', function(d) { return d["Crédits de paiement"]/1000000000})
-      
-  //     .style("fill", function(d) { return color(d.Action)});
-    
-
-// var stratify = d3.stratify()
-//     .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
-//     var pack = d3.pack()
-//     .size([width - 2, height - 2])
-//     .padding(1);
+  //GRAPH diff : Assomptions on code above
+  var svg2 = d3.select("#svg2"),
+    g2 = svg2.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
 
-//  var root = stratify(plf2019)
-//       .sum(function(d) { return d.value; })
-//       .sort(function(a, b) { return b.value - a.value; });
-console.log(plf2019)
+  let root2 = d3.hierarchy(modelplfDiff)
+        .sum(function(d) { return d.size; })
+        .sort(function(a, b) { return b.value - a.value; });
+
+  let focus2 = root2,
+      nodes2 = pack(root2).descendants(),
+      view2;
+
+  let circle2 = g2.selectAll("circle")
+    .data(nodes2)
+    .enter().append("circle")
+      .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
+      .style("fill", function(d) { 
+        if(d.data.color)
+          return  colorScale(parseInt(d.data.color));
+        else
+          return colorGreys(d.depth/10);
+         })
+      .on("click", function(d) { console.log(d); if (focus2 !== d) zoom2(d), d3.event.stopPropagation(); });
+
+  let text2 = g2.selectAll("text")
+    .data(nodes2)
+    .enter().append("text")
+      .attr("class", "label")
+      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0.5; })
+      .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
+      .text(function(d) {
+       return d.data.name 
+      })
+      // + " :"+ Math.round(parseInt(d.data.color)/1000000000) +"Md€"})
+      //  .call(wrap, 800)
+
+  var node2 = g2.selectAll("circle,text");
+
+  svg2
+      .style("background", colorz(0))
+      .on("click", function() { zoom(root2); });
+
+  zoomTo2([root2.x, root2.y, root2.r * 2 + margin]);
+
+  function zoom2(d) {
+    var focus02 = focus2; focus2 = d;
+
+    var transition2 = d3.transition()
+        .duration(d3.event.altKey ? 7500 : 750)
+        .tween("zoom", function(d) {
+          var i = d3.interpolateZoom(view2, [focus2.x, focus2.y, focus2.r * 2 + margin]);
+          return function(t) { zoomTo2(i(t)); };
+        });
+
+    transition2.selectAll("text")
+      .filter(function(d) { return d.parent === focus2 || this.style.display === "inline"; })
+        .style("fill-opacity", function(d) { return d.parent === focus2 ? 1 : 0; })
+        .on("start", function(d) { if (d.parent === focus2) this.style.display = "inline"; })
+        .on("end", function(d) { if (d.parent !== focus2) this.style.display = "none"; });
+  }
+
+  function zoomTo2(v) {
+    var k = diameter / v[2]; view2 = v;
+    node2.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+    circle2.attr("r", function(d) { return d.r * k; });
+  }
+
+  function wrap(text, width) {
+    text.each(function() {
+      var text = d3.select(this),
+          words = text.text().split(/\s+/).reverse(),
+          word,
+          line = [],
+          lineNumber = 0,
+          lineHeight = 1.1, // ems
+          y = text.attr("y"),
+          dy = parseFloat(text.attr("dy")),
+          tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+      while (word = words.pop()) {
+        line.push(word);
+        tspan.text(line.join(" "));
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+        }
+      }
+    });
+  }
+
+
+  // TABS
+  window.addEventListener("load", function() {
+    // store tabs variable
+    var myTabs = document.querySelectorAll("ul.tab-block > li");
+    function myTabClicks(tabClickEvent) {
+      for (var i = 0; i < myTabs.length; i++) {
+        myTabs[i].classList.remove("active");
+      }
+      var clickedTab = tabClickEvent.currentTarget;
+      clickedTab.classList.add("active");
+      tabClickEvent.preventDefault();
+      var myContentPanes = document.querySelectorAll(".tab-pane");
+      for (i = 0; i < myContentPanes.length; i++) {
+        myContentPanes[i].classList.remove("active");
+      }
+      var anchorReference = tabClickEvent.target;
+      var activePaneId = anchorReference.getAttribute("href");
+      var activePane = document.querySelector(activePaneId);
+      activePane.classList.add("active");
+    }
+    for (i = 0; i < myTabs.length; i++) {
+      myTabs[i].addEventListener("click", myTabClicks)
+    }
+  });
+
+
 
   </script>
   <style>
@@ -191,6 +325,18 @@ console.log(plf2019)
 .node--leaf {
   pointer-events: none;
 }
+
+
+.tab-content > .tab-pane {
+  display: none;
+}
+ .tab-content > .tab-pane.active {
+  display: block;
+  padding: 2.5% 3.5%;
+  background-color: #efefef;
+}
+
+
   </style>
 
 

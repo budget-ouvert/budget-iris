@@ -56,6 +56,7 @@
                 <div id="chartDiff" >
                     <svg id="svg2" width="800" height="800"></svg>
                 </div>        
+                Comparaison PLF 2019 / 2018
               </section>
               <section class="column col">
               </section>
@@ -71,11 +72,15 @@
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script>
 
+  //COLORS
+  // Theme
   let colorz = d3.scaleOrdinal(d3.schemeSet3);
-  let color = d3.scaleSequential(d3.interpolateSinebow)
-  .domain([-4, 4]);
-  let colorScale = d3.scaleSequential(d3.interpolateRdYlGn)
-  .domain([-500000000,500000000])
+  //Red to Green interpolateRdYlGn
+  let colorGreens = d3.scaleSequential(d3.interpolateGreens)
+  .domain([0,100])
+  let colorReds = d3.scaleSequential(d3.interpolateReds)
+  .domain([0,100])
+
   let colorGreys = d3.scaleSequential(d3.interpolateGreys)
 
   let tooltip = d3.select("body")
@@ -137,8 +142,8 @@
   var node = g.selectAll("circle,text");
 
   svg
-      .style("background", colorz(0))
-      .on("click", function() { zoom(root); });
+    .style("background", colorz(0))
+    .on("click", function() { zoom(root); });
 
   zoomTo([root.x, root.y, root.r * 2 + margin]);
 
@@ -184,11 +189,43 @@
       .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
       .style("fill", function(d) { 
         if(d.data.color)
-          return  colorScale(parseInt(d.data.color));
-        else
-          return colorGreys(d.depth/10);
-         })
-      .on("click", function(d) { console.log(d); if (focus2 !== d) zoom2(d), d3.event.stopPropagation(); });
+        {  
+          if(parseInt(d.data.color)>=0)
+            return colorGreens(parseInt(d.data.color))
+          if(parseInt(d.data.color)<0)
+            return colorReds(-parseInt(d.data.color))
+          if(d.data.color ==='FALSE')
+            return 'rgb(100, 200, 160)';
+                      // else if(parseInt(d.data.color)<=0)
+              // return colorReds(-parseInt(d.data.color))
+        } else {
+          return colorGreys(d.depth/5);
+        }
+      })
+      .on("click", function(d) { console.log(d); if (focus2 !== d) zoom2(d), d3.event.stopPropagation(); })
+      .on("mouseover", function(d) {
+              if (d.data.color==='FALSE'){
+
+                tooltip.text(d.data.name + "\n " + 'Creation?');
+              }
+              else if (d.data.color==='1000'){
+                tooltip.text(d.data.name + "\n " + '(0 crédits en 2018)');
+
+              }
+              else if (d.data.color){
+
+                tooltip.text(d.data.name + "\n " + d.data.color+'%');
+              }
+              else {
+                tooltip.text(d.data.name);
+
+              }
+              tooltip.style("visibility", "visible");
+      })
+      .on("mousemove", function() {
+          return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+      })
+      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
   let text2 = g2.selectAll("text")
     .data(nodes2)
@@ -205,8 +242,8 @@
   var node2 = g2.selectAll("circle,text");
 
   svg2
-      .style("background", colorz(0))
-      .on("click", function() { zoom(root2); });
+    .style("background", colorz(0))
+    .on("click", function() { zoom2(root2); });
 
   zoomTo2([root2.x, root2.y, root2.r * 2 + margin]);
 

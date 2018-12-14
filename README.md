@@ -4,17 +4,33 @@ Version simplifiée du projet RainbowViz pour tester
 
 Visualisation du projet de loi de finance 2019 et comparaison avec 2018
 
-## TODO 
+## Historique
 
-- [x] ajouter les tooltips
-- [x] faciliter la navigation
-- [ ] Afficher des informations plus completes ( AE, chiffres précis, arborescence, crédits consommés ...)
-- [ ] Compléter les données de différences ( plus de ligne)
-- [ ] 
+### 5 dec 2018 
+Version initiale
+
+### 7 dec 2018
+- Tooltips
+- Tabs de navigation
+  
+### 14 dec 2018
+- Refactorisation du code
+- Navigation par boutons
+- légende
+- Icone
+- chargement des données par fichier
 
 ## Notes
 
-### Todo (général)
+### Commentaire code 
+La visualisation utilise les données de data_plf_2019.json
+d3.hierarchy(data) organise en fonction de la hierarchie des noeuds
+Le champs size du modèle devient value et détermine la taille des cercle.
+Le champs "color" du modèle détermine la couleur, il s'agit en fait du pourcentage de différence 2018/2019 en utilisant les échelles colorGreens, et colorReds (-100% à + 800%)
+1000% représente une création ( les données utilisées sont à vérifier)
+Les fonctions zoom et zoomto servent à ajuster le focus
+
+### Todo (général rainbowviz)
 
 - améliorer visualisation
   - liste + piechart
@@ -23,10 +39,3 @@ Visualisation du projet de loi de finance 2019 et comparaison avec 2018
   - comparer les arborescences de mission, programmes actions...
   - comparer les affectations entre années
   - 
-### Traitements
-
-import pandas
-plf2018 = pandas.read_csv('PLFup2018.csv')
-
-=query(A:U;"select A,C,E,G,sum(T) where A like N and C like O and E like P and G like Q  group by A,C,E,G ")
-=query(A:Y;"select A,C,E,G,I, L,Y where A like M and D like P and F like R and H like T and J like V")

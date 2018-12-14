@@ -18,15 +18,16 @@
     <section class="navbar-section">
     </section>
     <section class="navbar-center">
+        <h1 class="text-center" style="margin:0">Budget Iris</h1>
     </section>
-    <section class="navbar-section">
-      <a href="https://github.com/rainbowViz/simpleRainbowViz/" class="btn btn-link">Dépôt GitHub</a>
-    </section>
+      <section class="navbar-section">
+        <a href="https://github.com/rainbowViz/simpleRainbowViz/" class="btn">Dépôt GitHub</a>
+      </section>
   </header>
 
   <div class="container" style="padding:1rem;">
-    <h1>Budget Iris</h1>
-    <br>
+    <!-- <h1 class="text-center">Budget Iris</h1>
+    <br> -->
     <div class="columns">
       <section class="column col">
       </section> 
@@ -43,7 +44,7 @@
             </div>
             <div class="panel-body">
               <br>
-              <p>Visualisation complete du projet de loi de finance 2019 par type de mision, mission, action, programme et sous-action</p>
+              <p>Visualisation complete du projet de loi de finance 2019 par type de mission, mission, action, programme et sous-action</p>
               <br><br>
             </div>
             <div class="panel-footer">
@@ -175,14 +176,14 @@
     
     d3.select("#plfbtn")
     .on('click',function() {
-      circle.style("fill", function(d) { return  colorz(d.value+1); })
+      circle.transition().style("fill", function(d) { return  colorz(d.value+1); })
       document.querySelector("#plfbtn").classList.add("btn-primary");
       document.querySelector("#diffbtn").classList.remove("btn-primary");
     })
 
     d3.select("#diffbtn")
     .on('click',function() {
-      circle
+      circle.transition()
       .style("fill", function(d) { 
           if(d.data.color)
           {  

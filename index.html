@@ -129,8 +129,12 @@
 
         .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
         .on("mouseover", function(d) {
-                tooltip.text(d.data.name + "\n " + Math.round(d.value/1000000000)+'Md€');
-                tooltip.style("visibility", "visible");
+          let b = Math.round(d.value/1000000)
+            if (b>2000)
+              tooltip.text(d.data.name + "\n " + Math.round(b/1000)+' Mds€')
+            else 
+              tooltip.text(d.data.name + "\n " + b+' Mlls€');
+          tooltip.style("visibility", "visible");
         })
         .on("mousemove", function() {
             return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");

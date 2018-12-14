@@ -60,8 +60,8 @@
               <br>
               <p>Visualisation de la comparaison entre le projet de loi de finance 2018 et 2019.</p>
               <p><span style="color:darkred">■</span> -100% (suppression)</p>
-              <p><span style="color:darkgreen">■</span> +800%</p>
-              <p><span style="color:turquoise">■</span> Création (ou renommé)</p>
+              <p><span style="color:darkgreen">■</span> +1000%</p>
+              <p><span style="color:turquoise">■</span> Création</p>
               <br><br>
             </div>
             <div class="panel-footer">
@@ -189,14 +189,14 @@
       .style("fill", function(d) { 
           if(d.data.color)
           {  
-            if(parseInt(d.data.color)>=0)
+            if(parseInt(d.data.color)>=0 && parseInt(d.data.color)<1000)
+              // 1000: ligne correspondante à 0 en 2018
               return colorGreens(parseInt(d.data.color))
             if(parseInt(d.data.color)<0)
               return colorReds(-parseInt(d.data.color))
             if(d.data.color ==='FALSE')
-              return 'rgb(100, 200, 160)';
-                        // else if(parseInt(d.data.color)<=0)
-                // return colorReds(-parseInt(d.data.color))
+              // FALSE: Non trouvé en 2018, probablement création
+              return 'rgb(64,224,208)';
           } else {
             return colorGreys(d.depth/5);
           }

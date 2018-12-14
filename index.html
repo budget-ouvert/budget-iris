@@ -25,49 +25,49 @@
 
   <div class="container" style="padding:1rem;">
     <h1>Budget Iris</h1>
-    <ul class="tab tab-block">
-      <li class="tab-item active">
-        <a href="#tab-1">Visualisation Complete</a>
-      </li>
-      <li class="tab-item">
-        <a href="#tab-2" >Comparatif</a>
-      </li>
-    </ul>
-    <div class="tab-content">
-			<div id="tab-1" class="tab-pane active"> 
-        <div class="columns">
-          <section class="column col">
-            <!-- <h1>Section</h1> -->
-          </section> 
-          <section class="column col">
-            <div id="chart" >
-                <svg id="svg1" width="800" height="800"></svg>
-            </div>        
-          </section>
-          <section class="column col">
-            </section> 
-        </div> <!-- columns -->
-			</div> 
-			<div id="tab-2" class="tab-pane">
-          <div class="columns">
-              <section class="column col">
-              </section> 
-              <section class="column col">
-                <div id="chartDiff" >
-                    <svg id="svg2" width="800" height="800"></svg>
-                </div>        
-                Comparaison PLF 2019 / 2018
-              </section>
-              <section class="column col">
-              </section>
-            </div> <!-- columns -->
-      </div>
-    </div> <!-- tab content -->
-
-
+    <br><br>
+    <div class="columns">
+      <section class="column col">
+      </section> 
+      <section class="column col">
+        <div id="chartDiff" >
+            <svg id="svg1" width="800" height="800"></svg>
+        </div>        
+      </section>
+      <section class="column col">
+        <div class="columns"> 
+          <div class="panel column col">
+            <div class="panel-header">
+              <button class="btn btn-primary btn-block" id="plfbtn">PLF 2019</button>
+            </div>
+            <div class="panel-body">
+              <br>
+              <p>Visualisation complete du projet de loi de finance 2019 par type de mision, mission, action, programme et sous-action</p>
+              <br><br>
+            </div>
+            <div class="panel-footer">
+            </div>
+          </div>
+          <div class="panel column col">
+            <div class="panel-header">
+                <button class="btn btn-block" id="diffbtn">Comparaison 2018/2019</button>
+              </div>
+            <div class="panel-body">
+              <br>
+              <p>Visualisation de la comparaison entre le projet de loi de finance 2018 et 2019.</p>
+              <p><span style="color:darkred">■</span> -100% (suppression)</p>
+              <p><span style="color:darkgreen">■</span> +800%</p>
+              <p><span style="color:turquoise">■</span> Création (ou renommé)</p>
+              <br><br>
+            </div>
+            <div class="panel-footer">
+            </div>
+          </div>
+        </div> <!-- columns interne-->
+      </section>
+    </div> <!-- columns -->
   </div> <!-- container-->
 
-  </div>
   <script src="./data_plf_2019.js"></script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script>
@@ -106,7 +106,7 @@
     .size([diameter - margin, diameter - margin])
     .padding(1);
 
-  let root = d3.hierarchy(modelplf2019)
+  let root = d3.hierarchy(modelplfDiff)
         .sum(function(d) { return d.size; })
         .sort(function(a, b) { return b.value - a.value; });
 
@@ -142,7 +142,7 @@
   var node = g.selectAll("circle,text");
 
   svg
-    .style("background", colorz(0))
+    .style("background", "#EEE")
     .on("click", function() { zoom(root); });
 
   zoomTo([root.x, root.y, root.r * 2 + margin]);
@@ -169,25 +169,18 @@
     node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
     circle.attr("r", function(d) { return d.r * k; });
   }
+  
+  d3.select("#plfbtn")
+  .on('click',function() {
+    circle.style("fill", function(d) { return  colorz(d.value+1); })
+    document.querySelector("#plfbtn").classList.add("btn-primary");
+    document.querySelector("#diffbtn").classList.remove("btn-primary");
+  })
 
-  //GRAPH diff : Assomptions on code above
-  var svg2 = d3.select("#svg2"),
-    g2 = svg2.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
-
-
-  let root2 = d3.hierarchy(modelplfDiff)
-        .sum(function(d) { return d.size; })
-        .sort(function(a, b) { return b.value - a.value; });
-
-  let focus2 = root2,
-      nodes2 = pack(root2).descendants(),
-      view2;
-
-  let circle2 = g2.selectAll("circle")
-    .data(nodes2)
-    .enter().append("circle")
-      .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
-      .style("fill", function(d) { 
+  d3.select("#diffbtn")
+  .on('click',function() {
+    circle
+    .style("fill", function(d) { 
         if(d.data.color)
         {  
           if(parseInt(d.data.color)>=0)
@@ -202,73 +195,9 @@
           return colorGreys(d.depth/5);
         }
       })
-      .on("click", function(d) { console.log(d); if (focus2 !== d) zoom2(d), d3.event.stopPropagation(); })
-      .on("mouseover", function(d) {
-              if (d.data.color==='FALSE'){
-
-                tooltip.text(d.data.name + "\n " + 'Creation?');
-              }
-              else if (d.data.color==='1000'){
-                tooltip.text(d.data.name + "\n " + '(0 crédits en 2018)');
-
-              }
-              else if (d.data.color){
-
-                tooltip.text(d.data.name + "\n " + d.data.color+'%');
-              }
-              else {
-                tooltip.text(d.data.name);
-
-              }
-              tooltip.style("visibility", "visible");
-      })
-      .on("mousemove", function() {
-          return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
-      })
-      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
-
-  let text2 = g2.selectAll("text")
-    .data(nodes2)
-    .enter().append("text")
-      .attr("class", "label")
-      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0.5; })
-      .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
-      .text(function(d) {
-       return d.data.name 
-      })
-      // + " :"+ Math.round(parseInt(d.data.color)/1000000000) +"Md€"})
-      //  .call(wrap, 800)
-
-  var node2 = g2.selectAll("circle,text");
-
-  svg2
-    .style("background", colorz(0))
-    .on("click", function() { zoom2(root2); });
-
-  zoomTo2([root2.x, root2.y, root2.r * 2 + margin]);
-
-  function zoom2(d) {
-    var focus02 = focus2; focus2 = d;
-
-    var transition2 = d3.transition()
-        .duration(d3.event.altKey ? 7500 : 750)
-        .tween("zoom", function(d) {
-          var i = d3.interpolateZoom(view2, [focus2.x, focus2.y, focus2.r * 2 + margin]);
-          return function(t) { zoomTo2(i(t)); };
-        });
-
-    transition2.selectAll("text")
-      .filter(function(d) { return d.parent === focus2 || this.style.display === "inline"; })
-        .style("fill-opacity", function(d) { return d.parent === focus2 ? 1 : 0; })
-        .on("start", function(d) { if (d.parent === focus2) this.style.display = "inline"; })
-        .on("end", function(d) { if (d.parent !== focus2) this.style.display = "none"; });
-  }
-
-  function zoomTo2(v) {
-    var k = diameter / v[2]; view2 = v;
-    node2.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
-    circle2.attr("r", function(d) { return d.r * k; });
-  }
+    document.querySelector("#plfbtn").classList.remove("btn-primary");
+    document.querySelector("#diffbtn").classList.add("btn-primary");
+  })
 
   function wrap(text, width) {
     text.each(function() {
@@ -293,34 +222,6 @@
       }
     });
   }
-
-
-  // TABS
-  window.addEventListener("load", function() {
-    // store tabs variable
-    var myTabs = document.querySelectorAll("ul.tab-block > li");
-    function myTabClicks(tabClickEvent) {
-      for (var i = 0; i < myTabs.length; i++) {
-        myTabs[i].classList.remove("active");
-      }
-      var clickedTab = tabClickEvent.currentTarget;
-      clickedTab.classList.add("active");
-      tabClickEvent.preventDefault();
-      var myContentPanes = document.querySelectorAll(".tab-pane");
-      for (i = 0; i < myContentPanes.length; i++) {
-        myContentPanes[i].classList.remove("active");
-      }
-      var anchorReference = tabClickEvent.target;
-      var activePaneId = anchorReference.getAttribute("href");
-      var activePane = document.querySelector(activePaneId);
-      activePane.classList.add("active");
-    }
-    for (i = 0; i < myTabs.length; i++) {
-      myTabs[i].addEventListener("click", myTabClicks)
-    }
-  });
-
-
 
   </script>
   <style>
@@ -347,15 +248,6 @@
   .node--root,
   .node--leaf {
     pointer-events: none;
-  }
-
-  .tab-content > .tab-pane {
-    display: none;
-  }
-  .tab-content > .tab-pane.active {
-    display: block;
-    padding: 2.5% 3.5%;
-    background-color: #efefef;
   }
 
   </style>

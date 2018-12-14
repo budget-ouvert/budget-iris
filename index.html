@@ -25,7 +25,7 @@
 
   <div class="container" style="padding:1rem;">
     <h1>Budget Iris</h1>
-    <br><br>
+    <br>
     <div class="columns">
       <section class="column col">
       </section> 
@@ -48,7 +48,7 @@
             <div class="panel-footer">
             </div>
           </div>
-          <div class="panel column col">
+          <div class="panel column col" style="margin-top:0.2rem">
             <div class="panel-header">
                 <button class="btn btn-block" id="diffbtn">Comparaison 2018/2019</button>
               </div>
@@ -68,7 +68,7 @@
     </div> <!-- columns -->
   </div> <!-- container-->
 
-  <script src="./data_plf_2019.js"></script>
+  <!-- <script src="./data_plf_2019.js"></script> -->
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script>
 
@@ -96,112 +96,117 @@
       .text("tooltip");
 
 
-  // GRAPH COMPLET 
-  var svg = d3.select("#svg1"),
+  // GRAPH
+  d3.json("./data_plf_2019.json").then(function(data) {
+
+    let svg = d3.select("#svg1"),
       margin = 10,
       diameter = +svg.attr("width"),
       g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
-  var pack = d3.pack()
-    .size([diameter - margin, diameter - margin])
-    .padding(1);
+    let pack = d3.pack()
+      .size([diameter - margin, diameter - margin])
+      .padding(1);
 
-  let root = d3.hierarchy(modelplfDiff)
-        .sum(function(d) { return d.size; })
-        .sort(function(a, b) { return b.value - a.value; });
+    let root = d3.hierarchy(data)
+      .sum(function(d) { return d.size; })
+      .sort(function(a, b) { return b.value - a.value; });
 
-  let focus = root,
+    let focus = root,
       nodes = pack(root).descendants(),
       view;
 
-  var circle = g.selectAll("circle")
-    .data(nodes)
-    .enter().append("circle")
-      .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
-      // .style("fill", function(d) { return  colorz(d.value%1+1); })
-      .style("fill", function(d) { return  colorz(d.value+1); })
+    let circle = g.selectAll("circle")
+      .data(nodes)
+      .enter().append("circle")
+        .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
+        // .style("fill", function(d) { return  colorz(d.value%1+1); })
+        .style("fill", function(d) { return  colorz(d.value+1); })
 
-      .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
-      .on("mouseover", function(d) {
-              tooltip.text(d.data.name + "\n " + Math.round(d.value/1000000000)+'Md€');
-              tooltip.style("visibility", "visible");
-      })
-      .on("mousemove", function() {
-          return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
-      })
-      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+        .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
+        .on("mouseover", function(d) {
+                tooltip.text(d.data.name + "\n " + Math.round(d.value/1000000000)+'Md€');
+                tooltip.style("visibility", "visible");
+        })
+        .on("mousemove", function() {
+            return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+        })
+        .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
 
-  var text = g.selectAll("text")
-    .data(nodes)
-    .enter().append("text")
-      .attr("class", "label")
-      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0.5; })
-      .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
-      .text(function(d) { return d.data.name; });
+    let text = g.selectAll("text")
+      .data(nodes)
+      .enter().append("text")
+        .attr("class", "label")
+        .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0.5; })
+        .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
+        .text(function(d) { return d.data.name; });
 
-  var node = g.selectAll("circle,text");
+    let node = g.selectAll("circle,text");
 
-  svg
-    .style("background", "#EEE")
-    .on("click", function() { zoom(root); });
+    svg
+      .style("background", "#EEE")
+      .on("click", function() { zoom(root); });
 
-  zoomTo([root.x, root.y, root.r * 2 + margin]);
+    zoomTo([root.x, root.y, root.r * 2 + margin]);
 
-  function zoom(d) {
-    var focus0 = focus; focus = d;
+    function zoom(d) {
+      let focus0 = focus; focus = d;
 
-    var transition = d3.transition()
-        .duration(d3.event.altKey ? 7500 : 750)
-        .tween("zoom", function(d) {
-          var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
-          return function(t) { zoomTo(i(t)); };
-        });
+      let transition = d3.transition()
+          .duration(d3.event.altKey ? 7500 : 750)
+          .tween("zoom", function(d) {
+            let i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+            return function(t) { zoomTo(i(t)); };
+          });
 
-    transition.selectAll("text")
-      .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
-        .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
-        .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
-        .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
-  }
+      transition.selectAll("text")
+        .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+          .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
+          .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+          .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+    }
 
-  function zoomTo(v) {
-    var k = diameter / v[2]; view = v;
-    node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
-    circle.attr("r", function(d) { return d.r * k; });
-  }
-  
-  d3.select("#plfbtn")
-  .on('click',function() {
-    circle.style("fill", function(d) { return  colorz(d.value+1); })
-    document.querySelector("#plfbtn").classList.add("btn-primary");
-    document.querySelector("#diffbtn").classList.remove("btn-primary");
+    function zoomTo(v) {
+      let k = diameter / v[2]; view = v;
+      node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+      circle.attr("r", function(d) { return d.r * k; });
+    }
+    
+    d3.select("#plfbtn")
+    .on('click',function() {
+      circle.style("fill", function(d) { return  colorz(d.value+1); })
+      document.querySelector("#plfbtn").classList.add("btn-primary");
+      document.querySelector("#diffbtn").classList.remove("btn-primary");
+    })
+
+    d3.select("#diffbtn")
+    .on('click',function() {
+      circle
+      .style("fill", function(d) { 
+          if(d.data.color)
+          {  
+            if(parseInt(d.data.color)>=0)
+              return colorGreens(parseInt(d.data.color))
+            if(parseInt(d.data.color)<0)
+              return colorReds(-parseInt(d.data.color))
+            if(d.data.color ==='FALSE')
+              return 'rgb(100, 200, 160)';
+                        // else if(parseInt(d.data.color)<=0)
+                // return colorReds(-parseInt(d.data.color))
+          } else {
+            return colorGreys(d.depth/5);
+          }
+        })
+      document.querySelector("#plfbtn").classList.remove("btn-primary");
+      document.querySelector("#diffbtn").classList.add("btn-primary");
+    })
+    
   })
 
-  d3.select("#diffbtn")
-  .on('click',function() {
-    circle
-    .style("fill", function(d) { 
-        if(d.data.color)
-        {  
-          if(parseInt(d.data.color)>=0)
-            return colorGreens(parseInt(d.data.color))
-          if(parseInt(d.data.color)<0)
-            return colorReds(-parseInt(d.data.color))
-          if(d.data.color ==='FALSE')
-            return 'rgb(100, 200, 160)';
-                      // else if(parseInt(d.data.color)<=0)
-              // return colorReds(-parseInt(d.data.color))
-        } else {
-          return colorGreys(d.depth/5);
-        }
-      })
-    document.querySelector("#plfbtn").classList.remove("btn-primary");
-    document.querySelector("#diffbtn").classList.add("btn-primary");
-  })
 
   function wrap(text, width) {
     text.each(function() {
-      var text = d3.select(this),
+      let text = d3.select(this),
           words = text.text().split(/\s+/).reverse(),
           word,
           line = [],

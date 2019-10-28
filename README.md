@@ -1,4 +1,4 @@
-# Budget Iris / RainbowViz
+# Budget Iris 
 
 Version simplifiée du projet RainbowViz pour tester
 
